@@ -86,7 +86,9 @@ StepDirStepper<Motate::kSocket4_StepPinNumber,
 //    Motate::kSocket6_VrefPinNumber>
 //  motor_6 {M6_STEP_POLARITY, M6_ENABLE_POLARITY};
 
-Stepper* Motors[MOTORS] = {&motor_1, &motor_2, &motor_3, &motor_4};
+StepDirHobbyServo motor_5;
+
+Stepper* Motors[MOTORS] = {&motor_1, &motor_2, &motor_3, &motor_4, &motor_5};
 
 void board_stepper_init() {
     for (uint8_t motor = 0; motor < MOTORS; motor++) { Motors[motor]->init(); }

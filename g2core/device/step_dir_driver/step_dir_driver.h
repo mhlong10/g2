@@ -32,6 +32,7 @@
 #include "MotateTimers.h"
 
 #include "stepper.h"
+#include "config_app.h"
 
 using Motate::pin_number;
 using Motate::OutputPin;

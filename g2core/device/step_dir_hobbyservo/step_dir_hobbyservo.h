@@ -32,41 +32,27 @@
 #include "MotateTimers.h"
 
 #include "stepper.h"
+#include "spindle.h"
+#include "config_app.h" // For debug access to use_data
 
-using Motate::pin_number;
-using Motate::OutputPin;
-using Motate::PWMOutputPin;
-using Motate::kStartHigh;
-using Motate::kNormal;
 using Motate::Timeout;
 
 
 // Motor structures
-template <pin_number pwm_pin_num>  // Setup a stepper template to hold our pins
 struct StepDirHobbyServo final : Stepper {
     /* stepper pin assignments */
 
     int16_t                _microsteps_per_step = 1;
     bool                   _step_is_forward = false;
-    int32_t                _position = 0; // in steps from 0 - 6400 for a full "rotation"
-    int32_t                _position_computed = 0; // in steps from 0 - 6400 for a full "rotation"
-    float                  _min_value;
-    float                  _max_value;
-    float                  _value_range;
+    int32_t                _position = 0; // in steps from spindle.speed_min to spindle.speed_max
+    float                  _speed = 0.0; // Speed scaled based on microsteps per step
     bool                   _enabled = false;
-    PWMOutputPin<pwm_pin_num> _pwm_pin;
-    Motate::Timeout check_timer;
+//    Motate::Timeout check_timer;
 
     // sets default pwm freq for all motor vrefs (commented line below also sets HiZ)
-    StepDirHobbyServo(const uint32_t frequency = 50) : Stepper{}, _pwm_pin{kNormal, frequency} {
-        _pwm_pin.setFrequency(frequency); // redundant due to a bug
-        uint16_t _top_value = _pwm_pin.getTopValue();
-        float frequency_inv = 1.0/(float)frequency;
-        _min_value = (float)_top_value / ((frequency_inv)/(750.0/1000000.0));
-        _max_value = (float)_top_value / ((frequency_inv)/(2000.0/1000000.0));
-        _value_range = _max_value - _min_value;
-        _position_computed = _min_value;
-        check_timer.set(1);
+    StepDirHobbyServo(void) : Stepper{} {
+        _speed = spindle.speed;
+//        check_timer.set(1);
     };
 
     /* Optional override of init */
@@ -105,13 +91,21 @@ struct StepDirHobbyServo final : Stepper {
     };
 
     void _enableImpl() override {
-        _enabled = true;
-        _pwm_pin.setExactDutyCycle(_position_computed, true);
+        if (!_enabled) {
+            _enabled = true;
+            if (cm_is_laser_tool()) {
+                spindle_speed_immediate(_speed);
+            }
+        }
     };
 
     void _disableImpl() override {
-        _enabled = false;
-        _pwm_pin.setExactDutyCycle(0, true);
+        if (_enabled) {
+            _enabled = false;
+            if (cm_is_laser_tool()) {
+                spindle_speed_immediate(0.0);
+            }
+        }
     };
 
     void stepStart() override {
@@ -123,26 +117,33 @@ struct StepDirHobbyServo final : Stepper {
             _position -= _microsteps_per_step;
         }
 
-        if (!check_timer.isPast()) { return; }
-        check_timer.set(10);
+//        if (!check_timer.isPast()) { return; }
+//        check_timer.set(10);
 
-        float used_position = _position;
-        if (used_position > 6400.0) {
-            used_position = 6400.0;
+        _speed = (float)_position / 32.0;
+        if (_speed > spindle.speed_max) {
+            _speed = spindle.speed_max;
         }
-        if (used_position < 0.0) {
-            used_position = 0.0;
+        if (_speed < spindle.speed_min) {
+            _speed = spindle.speed_min;
         }
 
-        _position_computed = _min_value + ((used_position/6400.0) * _value_range);
-        _pwm_pin.setExactDutyCycle(_position_computed, true); // apply the change
+        // 0% == spindle.speed_min -> 100% == spindle.speed_max
+        if (cm_is_laser_tool()) {
+            spindle_speed_immediate(_speed);
+        } else {
+            // For now the way to zero this is to go move off laser tool.  The process should be
+            // T1 (or any tool not T32) do G0W0 to set canonical machine to 0 as well.
+            _position = 0;
+        }
+        cfg.user_data_a[0] = _position;
     };
 
     void stepEnd() override {
     };
 
     void setDirection(uint8_t new_direction) override {
-        _step_is_forward = new_direction;
+        _step_is_forward = (new_direction == DIRECTION_CW);
     };
 
     void setPowerLevel(float new_pl) override {

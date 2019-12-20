@@ -44,7 +44,7 @@
 // These must be defines (not enums) so expressions like this:
 //  #if (MOTORS >= 6)  will work
 
-#define MOTORS 4                    // number of motors supported the hardware
+#define MOTORS 5                    // number of motors supported the hardware
 #define PWMS 2                      // number of PWM channels supported the hardware
 
 /*************************
