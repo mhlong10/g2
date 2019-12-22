@@ -130,12 +130,19 @@ struct StepDirHobbyServo final : Stepper {
 
         // 0% == spindle.speed_min -> 100% == spindle.speed_max
         if (cm_is_laser_tool()) {
-            spindle_speed_immediate(_speed);
-        } else {
+            uint8_t v;
+            if (pdb.read_next_byte(v))
+                spindle_speed_immediate(v);
+//            spindle_speed_immediate(_speed);
+
+        }
+#if 0
+        else {
             // For now the way to zero this is to go move off laser tool.  The process should be
             // T1 (or any tool not T32) do G0W0 to set canonical machine to 0 as well.
             _position = 0;
         }
+#endif
         cfg.user_data_a[0] = _position;
     };
 

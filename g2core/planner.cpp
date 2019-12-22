@@ -142,6 +142,48 @@ struct _json_commands_t {
 };
 _json_commands_t jc;
 
+_pixel_buffer_t pdb;
+
+// Returns 0xff if 'c' is invalid hex character
+uint8_t hex_to_nibble(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    else if (c >= 'a' && c <= 'f') return 10 + c - 'a';
+    else if (c >= 'A' && c <= 'F') return 10 + c - 'A';
+    else return 0xff;
+}
+
+// For now this directly copies the string.  Later we will convert from hex.
+// And after that from Z85.
+// Sending a string length of 0 
+stat_t mp_set_pdb(nvObj_t *nv) 
+{
+    int     len;
+    uint8_t *pstr;
+	char	*pc;
+
+    if (nv->valuetype != TYPE_STRING) return STAT_VALUE_TYPE_ERROR;
+    len = strlen(*nv->stringp);
+    // For hex there should be an even number of characters
+    if (len & 1) return STAT_VALUE_TYPE_ERROR;
+	len /= 2;
+    if (len > pdb.free_bytes) return STAT_INPUT_EXCEEDS_MAX_LENGTH;
+    for (int i = 0; i < len * 2; i++) 
+        if (hex_to_nibble((*nv->stringp)[i]) == 0xff)
+            return STAT_VALUE_TYPE_ERROR; // Invalid hex character found 
+
+    pstr = (uint8_t *)pdb.get_write_buffer(len);
+    pc = *nv->stringp;
+    for (int i = 0; i < len; i++) {
+        *pstr++ = hex_to_nibble(*pc++) << 4 | hex_to_nibble(*pc++);
+    }
+
+    pdb.commit_buffer();
+
+    return(STAT_OK);
+}
+stat_t mp_get_pdb_avail(nvObj_t *nv)  { return(get_integer(nv, pdb.free_bytes)); }
+
+
 /****************************************************************************************
  * planner_init() - initialize MP, MR and planner queue buffers
  * planner_reset() - selective reset MP and MR structures

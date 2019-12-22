@@ -113,6 +113,9 @@ const cfgItem_t cfgArray[] = {
     { "sys", "hv", _sn,  0, hw_print_hv,  hw_get_hv,  set_ro, nullptr, 0 },
     { "sys", "id", _sn,  0, hw_print_id,  hw_get_id,  set_ro, nullptr, 0 },   // device ID (ASCII signature)
 
+    // dynamic data (up front for speed)
+    { "", "pad",_s0, 0, tx_print_int, mp_get_pdb_avail, mp_set_pdb, nullptr, 0 },    // combined machine state
+
     // dynamic model attributes for reporting purposes (up front for speed)
     { "", "stat",_i0, 0, cm_print_stat, cm_get_stat, set_ro, nullptr, 0 },    // combined machine state
     { "","stat2",_i0, 0, cm_print_stat, cm_get_stat2,set_ro, nullptr, 0 },    // combined machine state

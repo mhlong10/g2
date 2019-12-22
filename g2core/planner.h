@@ -655,4 +655,64 @@ void mp_exit_hold_state(void);
 
 void mp_dump_planner(mpBuf_t *bf_start);
 
+/****************************************************************************************
+ * Pixel buffer
+ */
+
+#define PIXEL_BUFFER_SIZE       (12*1024)
+
+struct _pixel_buffer_t {
+    uint8_t         _pb[PIXEL_BUFFER_SIZE];
+    int             _p;  // Producer idx
+    int             _c;  // Consumer idx
+    int             _np; // Next producer idx
+    int             free_bytes; // Free bytes available in buffer
+
+    // Constructor (initializer)
+    _pixel_buffer_t() {
+        _p = _c = _np = 0;
+        reset();
+    };
+
+    // Get a buffer of specified length.  If not enough space
+    // is available, return NULL.
+    void *get_write_buffer(int size) {
+        if (size > free_bytes) return NULL;
+		
+        free_bytes -= size;
+        if ((_np = (_p + size)) >= PIXEL_BUFFER_SIZE) _np -= PIXEL_BUFFER_SIZE;
+        return &_pb[_p];
+    }
+
+    // Commit write buffer
+    void commit_buffer() {
+        _p = _np;
+    };
+
+    int available_bytes() {
+        return (_p - _c < 0) ? (_p - _c) + PIXEL_BUFFER_SIZE : _p - _c;
+    }
+
+    // Returns true if data was available and value update.
+    bool read_next_byte(uint8_t &val) {
+        if (_p == _c) return false; // No date in pixel buffer.
+        val = _pb[_c];
+        if (++_c >= PIXEL_BUFFER_SIZE) _c = 0;
+        free_bytes++;
+        return true;
+    }
+
+    // Empty buffer without touching consumer index, which is only to be
+    // touched by the consumer (isr).
+    void reset() {
+        _np = _c;
+        _p = _np;
+        free_bytes = PIXEL_BUFFER_SIZE;
+    }
+};
+
+extern _pixel_buffer_t pdb;
+extern stat_t mp_set_pdb(nvObj_t *nv);
+extern stat_t mp_get_pdb_avail(nvObj_t *nv);
+
 #endif    // End of include Guard: PLANNER_H_ONCE
