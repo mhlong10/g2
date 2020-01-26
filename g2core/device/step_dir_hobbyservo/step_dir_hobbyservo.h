@@ -105,12 +105,12 @@ struct StepDirHobbyServo final : Stepper {
     };
 
     void _enableImpl() override {
-            _enabled = true;
+        _enabled = true;
         _pwm_pin.setExactDutyCycle(_position_computed, true);
     };
 
     void _disableImpl() override {
-            _enabled = false;
+        _enabled = false;
         _pwm_pin.setExactDutyCycle(0, true);
     };
 
