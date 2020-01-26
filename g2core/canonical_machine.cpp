@@ -1366,6 +1366,7 @@ static void _exec_change_tool(float *value, bool *flag)
 stat_t cm_change_tool(const uint8_t tool_change)
 {
     float value[] = { (float)cm->gm.tool_select };
+    if (cm_is_laser_tool()) pdb.reset(); // Ensure pixel data buffer is empty
     mp_queue_command(_exec_change_tool, value, nullptr);
     return (STAT_OK);
 }
