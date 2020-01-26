@@ -790,10 +790,10 @@ const cfgItem_t cfgArray[] = {
 
 #ifdef __USER_DATA
     // User defined data groups
-    { "uda","uda0", _fip, 0, tx_print_int, get_int32, set_int32, &cfg.user_data_a[0], USER_DATA_A0 },
-    { "uda","uda1", _fip, 0, tx_print_int, get_int32, set_int32, &cfg.user_data_a[1], USER_DATA_A1 },
-    { "uda","uda2", _fip, 0, tx_print_int, get_int32, set_int32, &cfg.user_data_a[2], USER_DATA_A2 },
-    { "uda","uda3", _fip, 0, tx_print_int, get_int32, set_int32, &cfg.user_data_a[3], USER_DATA_A3 },
+    { "uda","uda0", _fip, 0, tx_print_int, get_data, set_data, &cfg.user_data_a[0], USER_DATA_A0 },
+    { "uda","uda1", _fip, 0, tx_print_int, get_data, set_data, &cfg.user_data_a[1], USER_DATA_A1 },
+    { "uda","uda2", _fip, 0, tx_print_int, get_data, set_data, &cfg.user_data_a[2], USER_DATA_A2 },
+    { "uda","uda3", _fip, 0, tx_print_int, get_data, set_data, &cfg.user_data_a[3], USER_DATA_A3 },
 
     { "udb","udb0", _fip, 0, tx_print_int, get_data, set_data, &cfg.user_data_b[0], USER_DATA_B0 },
     { "udb","udb1", _fip, 0, tx_print_int, get_data, set_data, &cfg.user_data_b[1], USER_DATA_B1 },

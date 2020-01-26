@@ -434,7 +434,7 @@
 #define X_TRAVEL_MAX                840.0                     // {xtm:  travel between switches or crashes
 #endif
 #ifndef X_JERK_MAX
-#define X_JERK_MAX                  4500.0                  // {xjm:
+#define X_JERK_MAX                  5000.0                  // {xjm:
 #endif
 #ifndef X_JERK_HIGH_SPEED
 #define X_JERK_HIGH_SPEED           20000.0                  // {xjh:
@@ -475,7 +475,7 @@
 #define Y_TRAVEL_MAX                1400.0
 #endif
 #ifndef Y_JERK_MAX
-#define Y_JERK_MAX                  4500.0
+#define Y_JERK_MAX                  5000.0
 #endif
 #ifndef Y_JERK_HIGH_SPEED
 #define Y_JERK_HIGH_SPEED           20000.0
@@ -627,10 +627,10 @@
 #define W_AXIS_MODE                 AXIS_STANDARD
 #endif
 #ifndef W_VELOCITY_MAX
-#define W_VELOCITY_MAX              100000.0
+#define W_VELOCITY_MAX              30000.0
 #endif
 #ifndef W_FEEDRATE_MAX
-#define W_FEEDRATE_MAX              100000.0
+#define W_FEEDRATE_MAX              30000.0
 #endif
 #ifndef W_TRAVEL_MAX
 #define W_TRAVEL_MAX                0.0
@@ -639,10 +639,10 @@
 #define W_TRAVEL_MIN                0.0
 #endif
 #ifndef W_JERK_MAX
-#define W_JERK_MAX                  100000.0
+#define W_JERK_MAX                  10000.0
 #endif
 #ifndef W_JERK_HIGH_SPEED
-#define W_JERK_HIGH_SPEED           100000.0
+#define W_JERK_HIGH_SPEED           10000.0
 #endif
 #ifndef W_HOMING_INPUT
 #define W_HOMING_INPUT              0
@@ -697,7 +697,7 @@
 
 // A AXIS
 #ifndef A_AXIS_MODE
-#define A_AXIS_MODE                 AXIS_RADIUS
+#define A_AXIS_MODE                 AXIS_STANDARD
 #endif
 #ifndef A_RADIUS
 #define A_RADIUS                    (M4_TRAVEL_PER_REV/(2*3.14159628))
@@ -1046,7 +1046,7 @@
 // *** PWM Settings *** //
 
 #ifndef P1_PWM_FREQUENCY
-#define P1_PWM_FREQUENCY            2000                   // in Hz
+#define P1_PWM_FREQUENCY            2500                   // in Hz
 #endif
 #ifndef P1_CW_SPEED_LO
 #define P1_CW_SPEED_LO              0                  // in RPM (arbitrary units)

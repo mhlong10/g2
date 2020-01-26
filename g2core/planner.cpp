@@ -158,7 +158,6 @@ uint8_t hex_to_nibble(char c) {
 stat_t mp_set_pdb(nvObj_t *nv) 
 {
     int     len;
-    uint8_t *pstr;
 	char	*pc;
 
     if (nv->valuetype != TYPE_STRING) return STAT_VALUE_TYPE_ERROR;
@@ -166,22 +165,20 @@ stat_t mp_set_pdb(nvObj_t *nv)
     // For hex there should be an even number of characters
     if (len & 1) return STAT_VALUE_TYPE_ERROR;
 	len /= 2;
-    if (len > pdb.free_bytes) return STAT_INPUT_EXCEEDS_MAX_LENGTH;
+    if (len > pdb.free_bytes()) return STAT_INPUT_EXCEEDS_MAX_LENGTH;
     for (int i = 0; i < len * 2; i++) 
         if (hex_to_nibble((*nv->stringp)[i]) == 0xff)
             return STAT_VALUE_TYPE_ERROR; // Invalid hex character found 
 
-    pstr = (uint8_t *)pdb.get_write_buffer(len);
     pc = *nv->stringp;
     for (int i = 0; i < len; i++) {
-        *pstr++ = hex_to_nibble(*pc++) << 4 | hex_to_nibble(*pc++);
+        uint8_t b = hex_to_nibble(*pc) << 4;
+                b |= hex_to_nibble(*pc++);
+        pdb.write_next_byte(b);
     }
-
-    pdb.commit_buffer();
-
     return(STAT_OK);
 }
-stat_t mp_get_pdb_avail(nvObj_t *nv)  { return(get_integer(nv, pdb.free_bytes)); }
+stat_t mp_get_pdb_avail(nvObj_t *nv)  { return(get_integer(nv, pdb.free_bytes())); }
 
 
 /****************************************************************************************
